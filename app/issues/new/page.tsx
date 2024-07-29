@@ -10,11 +10,13 @@ import { zodResolver } from "@hookform/resolvers/zod"; // to integrate reacthook
 import { createIssueSchema } from "@/app/validationSchema";
 import { z } from "zod";
 import ErrorMessage from "@/app/components/ErrorMessage";
+import Spinner from "@/app/components/Spinner";
 
 type IssueForm = z.infer<typeof createIssueSchema>; // copys zod schemna to useform type
 
 const NewIssuePage = () => {
   const [error, setError] = useState("");
+  const [isSubmiting, setIsSubmiting] = useState(false);
   const router = useRouter();
   const {
     register,
@@ -25,6 +27,17 @@ const NewIssuePage = () => {
     resolver: zodResolver(createIssueSchema),
   });
 
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmiting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setIsSubmiting(false);
+      setError("An unexptected error happened...");
+    }
+  });
+
   return (
     <div className="max-w-xl">
       {error && (
@@ -32,17 +45,7 @@ const NewIssuePage = () => {
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form
-        className=" space-y-3"
-        onSubmit={handleSubmit(async (data) => {
-          try {
-            await axios.post("/api/issues", data);
-            router.push("/issues");
-          } catch (error) {
-            setError("An unexptected error happened...");
-          }
-        })}
-      >
+      <form className=" space-y-3" onSubmit={onSubmit}>
         <TextField.Root>
           <TextField.Input placeholder="Title" {...register("title")} />
         </TextField.Root>
@@ -58,7 +61,9 @@ const NewIssuePage = () => {
         />
 
         <ErrorMessage>{errors.description?.message}</ErrorMessage>
-        <Button>Submit New Issue</Button>
+        <Button disabled={isSubmiting}>
+          Submit New Issue {isSubmiting && <Spinner />}
+        </Button>
       </form>
     </div>
   );
