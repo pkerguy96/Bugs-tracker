@@ -1,9 +1,6 @@
 import prisma from "@/prisma/client";
 import { Table } from "@radix-ui/themes";
-/* import Link from "next/link"; */
-import Link from "../components/Link";
-
-import IssueStatusBadge from "../components/IssueStatusBadge";
+import { Link, IssueStatusBadge } from "@/app/components";
 import IssueActions from "./IssueActions";
 
 const IssuesPage = async () => {
@@ -48,5 +45,6 @@ const IssuesPage = async () => {
     </div>
   );
 };
-
+export const dynamic = "force-dynamic"; // force nextjs to not store cache
+/* export const revalidate = 0; */ // revalidate 0 all the time or 60 every 60 sec
 export default IssuesPage;
